@@ -18,7 +18,9 @@ app.get('*', async (c): Promise<void | Response> => {
     DOMAIN,
     WEBFLOW_SUBDOMAIN,
     SUBDOMAINS,
-    ROOT
+    ROOT,
+    S3_BUCKET_NAME,
+    ELASTIC_BEANSTALK_URL
   } = c.env;
   const {
     origin,
@@ -71,6 +73,32 @@ app.get('*', async (c): Promise<void | Response> => {
       wildcard_paths
     } = match;
 
+    // TODO : If the subdomain from the target_origin is 'static-maps', 'establishments' or 'resources',
+    const bucket_subdomains = ['static-maps', 'establishments', 'resources', 'seo'];
+    const match_index = bucket_subdomains.indexOf(subdomain);
+    if (match_index !== -1) { // Subdomain is one of the S3 bucket
+      const match_value = bucket_subdomains[match_index];
+      let target_origin = "";
+      let target_url = "";
+      switch (match_value) {
+        case 'static-maps':
+          target_origin = `https://${S3_BUCKET_NAME}/doctr-app/${match_value}`;
+          target_url = build_url([target_origin, wildcard_paths], search);
+          return await fetch(target_url);
+        case 'establishments':
+          target_origin = `https://${S3_BUCKET_NAME}/doctr-app/${match_value}`;
+          target_url = build_url([target_origin, wildcard_paths], search);
+          return await fetch(target_url);
+        case 'resources':
+          target_origin = `https://${S3_BUCKET_NAME}/${match_value}`;
+          target_url = build_url([target_origin, wildcard_paths], search);
+          return await fetch(target_url);
+        case 'seo':
+          target_origin = `http://${ELASTIC_BEANSTALK_URL}/${match_value}`;
+          target_url = build_url([target_origin, wildcard_paths], search);
+          return await fetch(target_url);
+      }
+    }
     const target_origin = create_origin(`${subdomain}.${DOMAIN}`);
     const target_url = build_url([target_origin, wildcard_paths], search);
 
