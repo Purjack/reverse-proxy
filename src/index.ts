@@ -47,15 +47,23 @@ app.get('*', async (c): Promise<void | Response> => {
     // Subdomain is reverse proxied
     const match = matcher.subdomain_to_path(hostname);
     if (match) {
-      const redirect_url = build_url([main_origin, match, paths], search);
-      console.log('redirecting from subdomain to path');
-      return c.redirect(redirect_url, 301);
+      if (match.includes('botin')) {
+        // Redirect to /app for botin subdomain
+        const redirect_url = build_url([main_origin, 'app', paths], search);
+        console.log('redirecting from subdomain to path');
+        return c.redirect(redirect_url, 301);
+      }
+      else {
+        // Classic redirect for other subdomains except
+        const redirect_url = build_url([main_origin, match, paths], search);
+        console.log('redirecting from subdomain to path');
+        return c.redirect(redirect_url, 301);
+      }
     } else if (hostname.startsWith(WEBFLOW_SUBDOMAIN)) {
       const redirect_url = build_url([main_origin, paths], search);
       console.log('redirecting from main webflow subdomain to path');
       return c.redirect(redirect_url, 301);
-    } 
-
+    }
   }
 
   // Handle trailing slashes
@@ -73,7 +81,7 @@ app.get('*', async (c): Promise<void | Response> => {
       wildcard_paths
     } = match;
 
-    // TODO : If the subdomain from the target_origin is 'static-maps', 'establishments' or 'resources',
+    // S3 Bucker Subdomains
     const bucket_subdomains = ['static-maps', 'establishments', 'resources', 'seo'];
     const match_index = bucket_subdomains.indexOf(subdomain);
     if (match_index !== -1) { // Subdomain is one of the S3 bucket
@@ -99,11 +107,12 @@ app.get('*', async (c): Promise<void | Response> => {
           return await fetch(target_url);
       }
     }
+
     const target_origin = create_origin(`${subdomain}.${DOMAIN}`);
     const target_url = build_url([target_origin, wildcard_paths], search);
 
     let response = await fetch(target_url);
-
+    
     // Handle redirected responses
     if (response.redirected && response.url) {
      
@@ -159,6 +168,18 @@ app.get('*', async (c): Promise<void | Response> => {
     }
     
     return response;
+  }
+  else if (paths[0] === 'app') {
+    const target_origin = create_origin(`botin.${DOMAIN}/app`);
+    const target_url = build_url([target_origin, paths.slice(1)], search);
+    // const header = new Headers();
+    // header.set('user-agent', "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
+    // return await fetch(target_url, {
+    //   headers: header
+    // })
+    return await fetch(target_url, 
+      {headers: c.req.raw.headers}
+    );
   }
 
   // Get file name from path
