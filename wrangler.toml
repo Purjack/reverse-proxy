@@ -1,16 +1,17 @@
-name = "doctr-test-reverse-proxy"
+account_id = "94bb5d045bac27503acc8e0ab9cce17b"
+name = "doctr-reverse-proxy"
 compatibility_date = "2024-02-07"
 main = "src/index.ts"
 
-routes = [{ pattern = "yournativesquare.fr", custom_domain = true },{ pattern = "www.yournativesquare.fr", custom_domain = true },{ pattern = "webflow.yournativesquare.fr/*", zone_name = "yournativesquare.fr" },{ pattern = "www.yournativesquare.fr/*", zone_name = "yournativesquare.fr" },{ pattern = "botin.yournativesquare.fr/*", zone_name = "yournativesquare.fr" },{ pattern = "static-maps.yournativesquare.fr/*", zone_name = "yournativesquare.fr" },{ pattern = "establishments.yournativesquare.fr/*", zone_name = "yournativesquare.fr" },{ pattern = "resources.yournativesquare.fr/*", zone_name = "yournativesquare.fr" },{ pattern = "seo.yournativesquare.fr/*", zone_name = "yournativesquare.fr" }]
+routes = [{ pattern = "doctr.ca", custom_domain = true },{ pattern = "www.doctr.ca", custom_domain = true },{ pattern = "webflow.doctr.ca/*", zone_name = "doctr.ca" },{ pattern = "www.doctr.ca/*", zone_name = "doctr.ca" },{ pattern = "botin.doctr.ca/*", zone_name = "doctr.ca" },{ pattern = "static-maps.doctr.ca/*", zone_name = "doctr.ca" },{ pattern = "establishments.doctr.ca/*", zone_name = "doctr.ca" },{ pattern = "resources.doctr.ca/*", zone_name = "doctr.ca" },{ pattern = "seo.doctr.ca/*", zone_name = "doctr.ca" }]
 
 [[r2_buckets]]
 binding = 'ROOT'                  # <~ do not change, else proxy will break
-bucket_name = 'doctr-test-bucket'
+bucket_name = 'doctr-bucket'
 
 [vars]
-DOMAIN = "yournativesquare.fr"
+DOMAIN = "doctr.ca"
 SUBDOMAINS = "botin, static-maps, establishments, resources, seo"
 WEBFLOW_SUBDOMAIN = "webflow"
-S3_BUCKET_NAME = "doctr-bucket-test.s3.eu-west-3.amazonaws.com"
+S3_BUCKET_NAME = "doctr-backend.s3.ca-central-1.amazonaws.com/doctr-app/" # "doctr-bucket-test.s3.eu-west-3.amazonaws.com"
 ELASTIC_BEANSTALK_URL = "backend-docker-prod-web.kfvghvqmav.ca-central-1.elasticbeanstalk.com"
